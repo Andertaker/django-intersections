@@ -13,6 +13,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'annoying',
         'django-oauth-tokens>=0.2.2',
         'tweepy',
         'django-vkontakte-api>=0.8.2',
