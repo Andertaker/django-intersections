@@ -1,4 +1,5 @@
 {% extends 'intersections/layout.html' %}
+{% load staticfiles %}
 
 
 {% block title %}Пересечение подписчиков{% endblock %}
@@ -7,7 +8,7 @@
 {% block content %}
     <h3>Пересечение подписчиков</h3>
 
-    <form action="{% url 'subscribers_intersection' %}" method="post" class="form-horizontal">
+    <form id="group_form" action="" method="post" class="form-horizontal">
         {% csrf_token %}
         {% for field in form %}
         <div class="form-group {% if field.errors %}has-error{% endif %}">
@@ -24,5 +25,13 @@
             </div>
         </div>
     </form>
+{% endblock %}
 
+
+{% block js %}
+<script>
+    GROUP_SUBSCRIBERS_UPDATE_URL = '{% url 'group_subscribers_update' %}';
+</script>
+
+    <script src="{% static 'js/subscribers_intersection.js' %}"></script>
 {% endblock %}

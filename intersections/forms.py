@@ -8,5 +8,6 @@ class GroupsForm(forms.Form):
                             widget=forms.Textarea(attrs={
                                 'class': 'form-control',
                                 'rows': '5',
-                                'style': 'width: 100% !important;'
+                                'style': 'width: 100% !important;',
+                                'required': '',
                             }))
