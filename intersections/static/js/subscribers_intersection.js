@@ -8,7 +8,7 @@ $("#group_form").submit(function(e){
         link = links_arr[i]
         console.log(link);
 
-        $.post(GROUP_SUBSCRIBERS_UPDATE_URL, {'link': link}, function(response) {
+        $.post(FETCH_GROUP_URL, {'link': link}, function(response) {
             console.log(response);
 
         })

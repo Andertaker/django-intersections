@@ -30,7 +30,8 @@
 
 {% block js %}
 <script>
-    GROUP_SUBSCRIBERS_UPDATE_URL = '{% url 'group_subscribers_update' %}';
+    FETCH_GROUP_URL = '{% url 'intersections:fetch_group' %}';
+    FETCH_GROUP_MEMBERS_MONITOR_URL =  '/fetch_group_members_monitor/';
 </script>
 
     <script src="{% static 'js/subscribers_intersection.js' %}"></script>
