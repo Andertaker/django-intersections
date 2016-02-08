@@ -28,12 +28,39 @@ $("#group_form").submit(function(e){
             $subscribers_table.append($row)
 
             if (group['members_count'] > group['members_in_db_count']) {
-
+                fetch_members(response['social'], group['id']);
             }
 
-        })
+        });
 
     }
+});
 
 
-})
+
+function fetch_members(social, group_id) {
+    url = FETCH_GROUP_MEMBERS_MONITOR_URL + social + '/' + group_id + '/'
+    $cell = $subscribers_table.find('tr:last td:nth-child(3)');
+
+    settings = {
+        'url': url,
+        'async': false,
+        'success': function(response) {
+            group = response['group'];
+            $cell.html(group['members_in_db_count']);
+        }
+    }
+
+    update_members = function(){
+        $.get(settings);
+        if (group['members_fetched_date'])
+            clearInterval(intervalID)
+    }
+    intervalID = setInterval(update_members, 5000)
+    update_members(); // first start without delay
+
+}
+
+
+
+
