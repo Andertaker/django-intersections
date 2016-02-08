@@ -42,11 +42,15 @@ def fetch_group(request):
         except ApiCallError:
             return {'success': False, 'errors': 'Group "%s" not found' % link}
 
+
+    group = {'id': group.pk,
+            'name': group.name,
+            'members_count': group.members_count,
+            'members_in_db_count': group.members.count(),
+    }
+
     return {'social': get_social(link),
-            'group_id': group.pk,
-            'group_name': group.name,
-            'group_members_count': group.members_count,
-            'group_members_in_db_count': group.members.count(),
+            'group': group,
     }
 
 
