@@ -47,6 +47,7 @@ def fetch_group(request):
             'name': group.name,
             'members_count': group.members_count,
             'members_in_db_count': group.members.count(),
+            'members_fetched_date': group.members_fetched_date,
     }
 
     return {'social': get_social(link),
@@ -70,8 +71,7 @@ def fetch_group_members_monitor(request, social, group_id):
         if not group:
             return {'success': False, 'errors': 'Group "%s %s" not found' % (social, group_id)}
 
-        group_members_in_db_count = group.members.count()
-        if group.members_count > group_members_in_db_count:
+        if not group.members_fetched_date:
             thread = FetchGroupMembersThread(group, name=process_name)
             thread.start()
 
@@ -80,13 +80,13 @@ def fetch_group_members_monitor(request, social, group_id):
 
         else:
             status = 'finished'
-            group_members_in_db_count = group_members_in_db_count
+            group_members_in_db_count = group.members.count()
 
     group = {'id': group.pk,
             'name': group.name,
             'members_count': group.members_count,
             'members_in_db_count': group_members_in_db_count,
-            'members_fetched_date': None, # TO DO: ...
+            'members_fetched_date': group.members_fetched_date,
     }
 
     return {'status': status,

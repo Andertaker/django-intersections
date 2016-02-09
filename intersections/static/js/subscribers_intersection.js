@@ -17,8 +17,8 @@ $("#group_form").submit(function(e){
             cells_arr = [
                 '<a href="%s">%s</a>'.replace(/%s/g, link),
                 group['name'],
-                group['members_count'],
                 group['members_in_db_count'],
+                group['members_count'],
             ]
 
             cells_arr = $.map(cells_arr, function(el) {
@@ -27,7 +27,7 @@ $("#group_form").submit(function(e){
             $row = $('<tr>').html(cells_arr);
             $subscribers_table.append($row)
 
-            if (group['members_count'] > group['members_in_db_count']) {
+            if (!group['members_fetched_date']) {
                 fetch_members(response['social'], group['id']);
             }
 

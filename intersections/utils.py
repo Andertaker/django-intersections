@@ -1,5 +1,7 @@
 import threading
 
+from django.utils import timezone
+
 
 def get_social(link):
     SOCIALS = {'twitter': 'https://twitter.com',
@@ -48,6 +50,9 @@ class FetchGroupMembersThread(threading.Thread):
 
             self.members_in_db_count += len(users) # TO FIX: does't not show real value
             offset += 1000
+
+        group.members_fetched_date = timezone.now()
+        group.save()
 
         if group.members_count > group.members.count():
             raise Exception("Error occured while fetch members for group %s" % group.pk)
