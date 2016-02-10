@@ -1,9 +1,6 @@
 $.ajaxPrefilter(function( options ) {
-    //console.log(options.async);
     options.async = false;
-    //console.log(options.async);
 });
-
 
 
 
@@ -15,26 +12,19 @@ $("#group_form").submit(function(e){
 
     $subscribers_table = $('#subscribers_table tbody');
     $subscribers_table.html('');
-    
-    var group;
-    var social;
-    
-    i = 0;
-    
 
-    //for (i in links_arr) {
-
+    var i = 0;
     iterate(i);
-            
-        
-        //response = result.responseJSON
-        //console.log(result);
-
 });
 
 
 function iterate(i) {
     link = links_arr[i]
+
+    i++;
+    if (i > links_arr.length)
+        return
+
     console.log(link);
 
     $.post(FETCH_GROUP_URL, {'link': link}, function(response) {
@@ -54,23 +44,20 @@ function iterate(i) {
         });
         $row = $('<tr>').html(cells_arr);
         $subscribers_table.append($row);
-        
+
         if (!group['members_fetched_date']) {
-            fetch_members(social, group['id']);
+            fetch_members(social, group['id'], i);
         }
         else {
-            i++;
-            console.log(i);
-            if (i < links_arr.length)
-                iterate(i); // iterate next link
+            iterate(i); // iterate next link
         }
     });
-        
+
 }
 
 
 
-function fetch_members(social, group_id) {
+function fetch_members(social, group_id, i) {
     url = FETCH_GROUP_MEMBERS_MONITOR_URL + social + '/' + group_id + '/'
     $cell = $subscribers_table.find('tr:last td:nth-child(3)');
 
@@ -89,17 +76,9 @@ function fetch_members(social, group_id) {
         $.get(settings);
         if (group['members_fetched_date']) {
             clearInterval(intervalID)
-            i++;
-            console.log(i);
-            if (i < links_arr.length)
-                iterate(i); // iterate next link
-        }    
+            iterate(i); // iterate next link
+        }
     }
     intervalID = setInterval(update_members, 5000)
     update_members(); // first start without delay
-
 }
-
-
-
-
