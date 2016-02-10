@@ -4,14 +4,21 @@ $.ajaxPrefilter(function( options ) {
 
 
 
+var intervalID;
+
+
 $("#group_form").submit(function(e){
     e.preventDefault();
+
+    if (intervalID)
+        clearInterval(intervalID)
 
     links = $(this).find('#id_links').val();
     links_arr = links.trim().split(/\s+/);
 
     $subscribers_table = $('#subscribers_table tbody');
     $subscribers_table.html('');
+
 
     var i = 0;
     iterate(i);
@@ -75,10 +82,10 @@ function fetch_members(social, group_id, i) {
     update_members = function(){
         $.get(settings);
         if (group['members_fetched_date']) {
-            clearInterval(intervalID)
+            clearInterval(intervalID);
             iterate(i); // iterate next link
         }
     }
-    intervalID = setInterval(update_members, 5000)
+    intervalID = setInterval(update_members, 5000);
     update_members(); // first start without delay
 }
