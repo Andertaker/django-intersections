@@ -17,7 +17,8 @@ $("#group_form").submit(function(e){
     links = $(this).find('#id_links').val();
     links_arr = links.trim().split(/\s+/);
 
-    $subscribers_table = $('#subscribers_table tbody');
+    $subscribers_table = $('#subscribers_table').show();
+    $subscribers_table = $('#subscribers_table').find('tbody');
     $subscribers_table.html('');
 
     groups = [];
