@@ -32,13 +32,22 @@ $("#group_form").submit(function(e){
 function iterate(i) {
     generate_intersections_table();
 
+    link = links_arr[i];
+
     i++;
     if (i > links_arr.length)
         return
 
-    link = links_arr[i];
-
     $.post(FETCH_GROUP_URL, {'link': link}, function(response) {
+        if (response['errors']) {
+            $row = $('<tr>');
+            $cell1 = $('<td>').html(link).appendTo($row);
+            $cell2 = $('<td class="error" colspan=3>').html(response['errors']).appendTo($row);
+            $subscribers_table.append($row);
+            iterate(i); // iterate next link
+            return
+        }
+
         social = response['social'];
         group = response['group'];
 
