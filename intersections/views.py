@@ -5,6 +5,7 @@ from django.views.generic import View
 from django.views.generic.base import TemplateResponseMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.db import connection
 
 from annoying.decorators import ajax_request
 from vkontakte_api.api import ApiCallError
@@ -45,6 +46,7 @@ def fetch_group(request):
 
     group = {'id': group.pk,
             'name': group.name,
+            'screen_name': group.screen_name,
             'members_count': group.members_count,
             'members_in_db_count': group.members.count(),
             'members_fetched_date': group.members_fetched_date,
@@ -84,6 +86,7 @@ def fetch_group_members_monitor(request, social, group_id):
 
     group = {'id': group.pk,
             'name': group.name,
+            'screen_name': group.screen_name,
             'members_count': group.members_count,
             'members_in_db_count': group_members_in_db_count,
             'members_fetched_date': group.members_fetched_date,
@@ -92,4 +95,21 @@ def fetch_group_members_monitor(request, social, group_id):
     return {'status': status,
             'group': group,
     }
+
+
+@ajax_request
+def get_intersections(request, group_id1, group_id2):
+    q = '''
+        SELECT COUNT(group_id) as cnt, user_id
+
+        FROM vkontakte_groups_group_members
+        WHERE group_id IN (%s, %s)
+        GROUP BY user_id
+        HAVING COUNT(group_id) > 1
+    '''
+
+    cursor = connection.cursor()
+    cursor.execute(q, [group_id1, group_id2])
+
+    return {'intersections_count': cursor.rowcount}
 
