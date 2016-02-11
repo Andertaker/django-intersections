@@ -5,6 +5,7 @@ $.ajaxPrefilter(function( options ) {
 
 
 var intervalID;
+var groups;
 
 
 $("#group_form").submit(function(e){
@@ -19,23 +20,25 @@ $("#group_form").submit(function(e){
     $subscribers_table = $('#subscribers_table tbody');
     $subscribers_table.html('');
 
-
+    groups = [];
     var i = 0;
     iterate(i);
 });
 
 
+
+
+
 function iterate(i) {
-    link = links_arr[i]
+    generate_intersections_table();
 
     i++;
     if (i > links_arr.length)
         return
 
-    console.log(link);
+    link = links_arr[i];
 
     $.post(FETCH_GROUP_URL, {'link': link}, function(response) {
-        console.log(response);
         social = response['social'];
         group = response['group'];
 
@@ -56,6 +59,7 @@ function iterate(i) {
             fetch_members(social, group['id'], i);
         }
         else {
+            groups.push(group);
             iterate(i); // iterate next link
         }
     });
@@ -83,9 +87,53 @@ function fetch_members(social, group_id, i) {
         $.get(settings);
         if (group['members_fetched_date']) {
             clearInterval(intervalID);
+            groups.push(group);
             iterate(i); // iterate next link
         }
     }
     intervalID = setInterval(update_members, 5000);
     update_members(); // first start without delay
+}
+
+
+function generate_intersections_table() {
+    if (groups.length == 0)
+        return
+
+    if(groups.length == 1) {
+        $intersections_tbody = $('#intersections_table tbody');
+        $intersections_tbody.html('');
+        $intersections_thead = $('#intersections_table thead');
+        $intersections_thead.html('<tr><th>ПЕРЕСЕЧЕНИЕ</th><th></th></tr><tr><th></th><th></th></tr>');
+    }
+
+    group = groups[groups.length-1] //last
+
+    // thead
+    $row1 = $intersections_thead.find('tr:first');
+    $row2 = $intersections_thead.find('tr:last');
+
+    $cell1 = $('<th>').html(group['screen_name'])
+    $cell2 = $('<td>').html(group['members_in_db_count'])
+    $cell1.appendTo($row1);
+    $cell2.appendTo($row2);
+
+    // tbody
+    $row = $('<tr>').appendTo($intersections_tbody); // last row
+    $cell1 = $('<th>').html(group['screen_name'])
+    $cell2 = $('<td>').html(group['members_in_db_count'])
+    $cell1.appendTo($row);
+    $cell2.appendTo($row);
+
+    // intersections
+
+    for(var i = 0; i < groups.length - 1; i++) {
+        var group1 = groups[i];
+
+        url = GET_INTERSECTIONS_URL + group1['id'] + '/' + group['id'] + '/';
+        $.get(url, function(response) {
+            $cell = $('<th>').html(response['intersections_count'])
+            $cell.appendTo($row);
+        });
+    }
 }

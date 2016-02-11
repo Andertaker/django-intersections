@@ -35,9 +35,14 @@
                 <th>Кол-во подписчиков в группе</th>
             </tr>
         </thead>
-
         <tbody></tbody>
+    </table>
 
+    <br><br>
+
+    <table id="intersections_table">
+        <thead></thead>
+        <tbody></tbody>
     </table>
 
 {% endblock %}
@@ -47,7 +52,7 @@
 <script>
     FETCH_GROUP_URL = '{% url 'intersections:fetch_group' %}';
     FETCH_GROUP_MEMBERS_MONITOR_URL =  '/intersections/fetch_group_members_monitor/';
-
+    GET_INTERSECTIONS_URL = '/intersections/get_intersections/';
 </script>
 
     <script src="{% static 'js/subscribers_intersection.js' %}"></script>
