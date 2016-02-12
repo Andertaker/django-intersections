@@ -117,7 +117,7 @@ function generate_intersections_table() {
         $intersections_thead.html('<tr><th>ПЕРЕСЕЧЕНИЕ</th><th></th></tr><tr><th></th><th></th></tr>');
     }
 
-    group = groups[groups.length-1] //last
+    group = groups[groups.length-1] // last group
 
     // thead
     $row1 = $intersections_thead.find('tr:first');
