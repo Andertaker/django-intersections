@@ -5,3 +5,7 @@ body {
 .error {
     color: red;
 }
+
+#intersections_table {
+    width: auto;
+}
