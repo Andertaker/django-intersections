@@ -31,8 +31,6 @@ $("#group_form").submit(function(e){
 
 
 function iterate(i) {
-    generate_intersections_table();
-
     link = links_arr[i];
 
     i++;
@@ -70,6 +68,7 @@ function iterate(i) {
         }
         else {
             groups.push(group);
+            generate_intersections_table();
             iterate(i); // iterate next link
         }
     });
@@ -98,6 +97,7 @@ function fetch_members(social, group_id, i) {
         if (group['members_fetched_date']) {
             clearInterval(intervalID);
             groups.push(group);
+            generate_intersections_table();
             iterate(i); // iterate next link
         }
     }
