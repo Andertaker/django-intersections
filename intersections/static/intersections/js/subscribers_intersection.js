@@ -55,10 +55,15 @@ function iterate(i) {
         social = response['social'];
         group = response['group'];
 
+        var members_in_db_count = group['members_in_db_count'];
+        if (!group['members_fetched_date']) {
+            members_in_db_count += '<i class="progress"> ...</i>';
+        }
+
         cells_arr = [
             '<a href="%s">%s</a>'.replace(/%s/g, link),
             group['name'],
-            group['members_in_db_count'],
+            members_in_db_count,
             group['members_count'],
         ]
 
@@ -93,7 +98,13 @@ function fetch_members(social, group_id, i) {
         'async': false,
         'success': function(response) {
             group = response['group'];
-            $cell.html(group['members_in_db_count']);
+
+            var members_in_db_count = group['members_in_db_count'];
+            if (!group['members_fetched_date']) {
+                members_in_db_count += '<i class="progress"> ...</i>';
+            }
+
+            $cell.html(members_in_db_count);
         }
     }
 
