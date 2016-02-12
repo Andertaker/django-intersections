@@ -21,6 +21,11 @@ $("#group_form").submit(function(e){
     $subscribers_table = $('#subscribers_table').find('tbody');
     $subscribers_table.html('');
 
+    $intersections_tbody = $('#intersections_table tbody');
+    $intersections_tbody.html('');
+    $intersections_thead = $('#intersections_table thead');
+    $intersections_thead.html('<tr><th>ПЕРЕСЕЧЕНИЕ</th><th></th></tr><tr><th></th><th></th></tr>');
+
     groups = [];
     var i = 0;
     iterate(i);
@@ -107,16 +112,6 @@ function fetch_members(social, group_id, i) {
 
 
 function generate_intersections_table() {
-    if (groups.length == 0)
-        return
-
-    if(groups.length == 1) {
-        $intersections_tbody = $('#intersections_table tbody');
-        $intersections_tbody.html('');
-        $intersections_thead = $('#intersections_table thead');
-        $intersections_thead.html('<tr><th>ПЕРЕСЕЧЕНИЕ</th><th></th></tr><tr><th></th><th></th></tr>');
-    }
-
     group = groups[groups.length-1] // last group
 
     // thead
@@ -153,7 +148,6 @@ function generate_intersections_table() {
         var cells_in_row = $(this).find('th').length;
 
         for(cells_in_row; cells_in_row < cells_count - 1; cells_in_row++) {
-            console.log(cells_in_row);
             $('<th>').appendTo($(this));
         }
     });
