@@ -136,7 +136,6 @@ function generate_intersections_table() {
     $cell2.appendTo($row);
 
     // intersections
-
     for(var i = 0; i < groups.length - 1; i++) {
         var group1 = groups[i];
 
@@ -146,4 +145,16 @@ function generate_intersections_table() {
             $cell.appendTo($row);
         });
     }
+
+    // add_epty_cells_to_rows
+    var cells_count = $intersections_thead.find('tr:first th').length;
+
+    $intersections_tbody.find('tr').each(function(index){
+        var cells_in_row = $(this).find('th').length;
+
+        for(cells_in_row; cells_in_row < cells_count - 1; cells_in_row++) {
+            console.log(cells_in_row);
+            $('<th>').appendTo($(this));
+        }
+    });
 }
