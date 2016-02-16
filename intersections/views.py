@@ -7,10 +7,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.db import connection
 
-from annoying.decorators import ajax_request
 from vkontakte_api.api import ApiCallError
 from vkontakte_groups.models import Group
 
+from . decorators import ajax_request
 from . forms import GroupsForm
 from . utils import FetchGroupMembersThread, get_proccess_by_name, get_social
 
