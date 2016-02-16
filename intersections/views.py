@@ -9,6 +9,8 @@ from django.db import connection
 
 from vkontakte_api.api import ApiCallError
 from vkontakte_groups.models import Group
+from tweepy import TweepError
+from twitter_api.models import User
 
 from . decorators import ajax_request
 from . forms import GroupsForm
@@ -39,6 +41,7 @@ class FetchGroupView(View):
         link = request.POST['link']
         social = get_social(link)
         screen_name = get_screen_name(link)
+        group = None
 
         if not social:
             return {'success': False, 'errors': 'This social network is not supported'}
@@ -47,6 +50,11 @@ class FetchGroupView(View):
 
         if social == 'vk':
             group = self.vk_fetch_group(screen_name)
+        elif social == 'twitter':
+            group = self.twitter_fetch_user(screen_name)
+
+        if not group:
+            return {'success': False, 'errors': 'Group "%s" not found' % screen_name}
 
         return {'social': social,
                 'group': group,
@@ -61,9 +69,9 @@ class FetchGroupView(View):
             try:
                 group = Group.remote.fetch(ids=[screen_name])[0]
             except ApiCallError:
-                return {'success': False, 'errors': 'Group "%s" not found' % link}
+                return None
 
-        group = {'id': group.pk,
+        return {'id': group.pk,
                 'name': group.name,
                 'screen_name': group.screen_name,
                 'members_count': group.members_count,
@@ -71,8 +79,22 @@ class FetchGroupView(View):
                 'members_fetched_date': group.members_fetched_date,
         }
 
-        return group
+    def twitter_fetch_user(self, screen_name):
+        user = User.objects.filter(screen_name=screen_name).first()
 
+        if not user or user.fetched < timezone.now() - GROUP_REFETCH_TIME:
+            try:
+                user = User.remote.fetch(screen_name)
+            except TweepError:
+                return None
+
+        return {'id': user.pk,
+                'name': user.name,
+                'screen_name': user.screen_name,
+                'members_count': user.followers_count,
+                'members_in_db_count': user.followers.count(),
+                # 'members_fetched_date': group.members_fetched_date,
+        }
 
 @ajax_request
 def fetch_group_members_monitor(request, social, group_id):
