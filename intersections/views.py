@@ -12,11 +12,10 @@ from vkontakte_groups.models import Group
 
 from . decorators import ajax_request
 from . forms import GroupsForm
-from . utils import FetchGroupMembersThread, get_proccess_by_name, get_social
+from . utils import FetchGroupMembersThread, get_proccess_by_name, get_social, get_screen_name
 
 
 GROUP_REFETCH_TIME = timedelta(hours=3)
-
 
 
 
@@ -28,33 +27,51 @@ class SubscribersIntersection(View, TemplateResponseMixin):
         return self.render_to_response({'form': GroupsForm})
 
 
-@csrf_exempt
-@ajax_request
-def fetch_group(request):
-    link = request.POST['link']
-    screen_name = link.split('/').pop()
 
-    # get and update group if needed
-    group = Group.objects.filter(screen_name=screen_name).first()
-    # need to refetch to update members_count parameter
-    if not group or group.fetched < timezone.now() - GROUP_REFETCH_TIME:
-        try:
-            group = Group.remote.fetch(ids=[screen_name])[0]
-        except ApiCallError:
-            return {'success': False, 'errors': 'Group "%s" not found' % link}
+class FetchGroupView(View):
 
+    @csrf_exempt
+    @ajax_request
+    def dispatch(self, request, *args, **kwargs):
+        return super(FetchGroupView, self).dispatch(request, *args, **kwargs)
 
-    group = {'id': group.pk,
-            'name': group.name,
-            'screen_name': group.screen_name,
-            'members_count': group.members_count,
-            'members_in_db_count': group.members.count(),
-            'members_fetched_date': group.members_fetched_date,
-    }
+    def post(self, request):
+        link = request.POST['link']
+        social = get_social(link)
+        screen_name = get_screen_name(link)
 
-    return {'social': get_social(link),
-            'group': group,
-    }
+        if not social:
+            return {'success': False, 'errors': 'This social network is not supported'}
+        if not screen_name:
+            return {'success': False, 'errors': 'Invalid link'}
+
+        if social == 'vk':
+            group = self.vk_fetch_group(screen_name)
+
+        return {'social': social,
+                'group': group,
+        }
+
+    def vk_fetch_group(self, screen_name):
+
+        # get and update group if needed
+        group = Group.objects.filter(screen_name=screen_name).first()
+        # need to refetch to update members_count parameter
+        if not group or group.fetched < timezone.now() - GROUP_REFETCH_TIME:
+            try:
+                group = Group.remote.fetch(ids=[screen_name])[0]
+            except ApiCallError:
+                return {'success': False, 'errors': 'Group "%s" not found' % link}
+
+        group = {'id': group.pk,
+                'name': group.name,
+                'screen_name': group.screen_name,
+                'members_count': group.members_count,
+                'members_in_db_count': group.members.count(),
+                'members_fetched_date': group.members_fetched_date,
+        }
+
+        return group
 
 
 @ajax_request
