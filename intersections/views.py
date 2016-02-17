@@ -15,7 +15,8 @@ from twitter_api.models import User
 from . decorators import ajax_request
 from . forms import GroupsForm
 from . utils import get_social, get_screen_name
-from . threads import FetchGroupMembersThread, get_proccess_by_name
+from . threads import VkFetchGroupMembersThread, TwitterFetchFollowersThread, \
+                    get_proccess_by_name
 
 
 GROUP_REFETCH_TIME = timedelta(hours=3)
@@ -106,12 +107,12 @@ class FetchGroupMembersMonitorView(View):
         return super(FetchGroupMembersMonitorView, self).dispatch(request, *args, **kwargs)
 
     def get(self, request, social, group_id):
-        return self.fetch_group_members_monitor(social, group_id)
+        return getattr(self, '%s_monitor' % social)(group_id)
 
 
-    def fetch_group_members_monitor(self, social, group_id):
+    def vk_monitor(self, group_id):
 
-        process_name = "%s_%s_fetch_members_proccess" % (social, group_id)
+        process_name = "vk_%s_fetch_members_proccess" % group_id
         thread = get_proccess_by_name(process_name)
 
         if thread:
@@ -122,10 +123,10 @@ class FetchGroupMembersMonitorView(View):
         else :
             group = Group.objects.filter(pk=group_id).first()
             if not group:
-                return {'success': False, 'errors': 'Group "%s %s" not found' % (social, group_id)}
+                return {'success': False, 'errors': 'Vk Group "%s" not found' % group_id}
 
             if not group.members_fetched_date:
-                thread = FetchGroupMembersThread(group, name=process_name)
+                thread = VkFetchGroupMembersThread(group, name=process_name)
                 thread.start()
 
                 status = 'started'
@@ -141,6 +142,44 @@ class FetchGroupMembersMonitorView(View):
                 'members_count': group.members_count,
                 'members_in_db_count': group_members_in_db_count,
                 'members_fetched_date': group.members_fetched_date,
+        }
+
+        return {'status': status,
+                'group': group,
+        }
+
+    def twitter_monitor(self, group_id): # user_id
+
+        process_name = "twitter_%s_fetch_members_proccess" % group_id
+        thread = get_proccess_by_name(process_name)
+
+        if thread:
+            group = thread.user
+            status = 'in_progress'
+            group_members_in_db_count = thread.followers_in_db_count
+
+        else :
+            group = User.objects.filter(pk=group_id).first()
+            if not group:
+                return {'success': False, 'errors': 'Twitter User "%s" not found' % group_id}
+
+            if not group.followers_fetched_date:
+                thread = TwitterFetchFollowersThread(group, name=process_name)
+                thread.start()
+
+                status = 'started'
+                group_members_in_db_count = thread.followers_in_db_count
+
+            else:
+                status = 'finished'
+                group_members_in_db_count = group.followers.count()
+
+        group = {'id': group.pk,
+                'name': group.name,
+                'screen_name': group.screen_name,
+                'members_count': group.followers_count,
+                'members_in_db_count': group_members_in_db_count,
+                'members_fetched_date': group.followers_fetched_date,
         }
 
         return {'status': status,

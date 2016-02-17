@@ -13,7 +13,7 @@ def get_proccess_by_name(proccess_name):
 
 
 
-class FetchGroupMembersThread(threading.Thread):
+class VkFetchGroupMembersThread(threading.Thread):
 
     group = None
     members_in_db_count = None
@@ -44,3 +44,24 @@ class FetchGroupMembersThread(threading.Thread):
 
         if group.members_count > group.members.count():
             raise Exception("Error occured while fetch members for group %s" % group.pk)
+
+
+class TwitterFetchFollowersThread(threading.Thread):
+
+    user = None
+    followers_in_db_count = None
+
+    def __init__(self, user, *args, **kwargs):
+        threading.Thread.__init__(self, *args, **kwargs)
+
+        self.daemon = True
+
+        self.user = user
+        self.followers_in_db_count = user.followers.count()
+
+    def run(self):
+        user = self.user
+        user.fetch_followers(all=True)
+
+        if user.followers_count > user.followers.count():
+            raise Exception("Error occured while fetch followers for user %s" % user.pk)
