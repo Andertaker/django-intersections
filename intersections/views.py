@@ -14,7 +14,8 @@ from twitter_api.models import User
 
 from . decorators import ajax_request
 from . forms import GroupsForm
-from . utils import FetchGroupMembersThread, get_proccess_by_name, get_social, get_screen_name
+from . utils import get_social, get_screen_name
+from . threads import FetchGroupMembersThread, get_proccess_by_name
 
 
 GROUP_REFETCH_TIME = timedelta(hours=3)
