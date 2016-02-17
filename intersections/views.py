@@ -101,11 +101,7 @@ class FetchGroupView(View):
 
 class FetchGroupMembersMonitorView(View):
 
-    @csrf_exempt
     @ajax_request
-    def dispatch(self, request, *args, **kwargs):
-        return super(FetchGroupMembersMonitorView, self).dispatch(request, *args, **kwargs)
-
     def get(self, request, social, group_id):
         return getattr(self, '%s_monitor' % social)(group_id)
 
@@ -187,9 +183,9 @@ class FetchGroupMembersMonitorView(View):
         }
 
 
-@ajax_request
-def get_intersections(request, group_id1, group_id2):
-    q = '''
+
+class GetIntersectionsView(View):
+    vk_query = '''
         SELECT COUNT(group_id) as cnt, user_id
 
         FROM vkontakte_groups_group_members
@@ -198,8 +194,11 @@ def get_intersections(request, group_id1, group_id2):
         HAVING COUNT(group_id) > 1
     '''
 
-    cursor = connection.cursor()
-    cursor.execute(q, [group_id1, group_id2])
+    @ajax_request
+    def get(self, request, social, group_id1, group_id2):
+        q = getattr(self, '%s_query' % social)
 
-    return {'intersections_count': cursor.rowcount}
+        cursor = connection.cursor()
+        cursor.execute(q, [group_id1, group_id2])
 
+        return {'intersections_count': cursor.rowcount}

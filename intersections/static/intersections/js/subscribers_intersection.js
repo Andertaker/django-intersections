@@ -78,7 +78,7 @@ function iterate(i) {
         }
         else {
             groups.push(group);
-            generate_intersections_table();
+            generate_intersections_table(social);
             iterate(i); // iterate next link
         }
     });
@@ -113,7 +113,7 @@ function fetch_members(social, group_id, i) {
         if (group['members_fetched_date']) {
             clearInterval(intervalID);
             groups.push(group);
-            generate_intersections_table();
+            generate_intersections_table(social);
             iterate(i); // iterate next link
         }
     }
@@ -122,7 +122,7 @@ function fetch_members(social, group_id, i) {
 }
 
 
-function generate_intersections_table() {
+function generate_intersections_table(social) {
     group = groups[groups.length-1] // last group
 
     // thead
@@ -145,7 +145,7 @@ function generate_intersections_table() {
     for(var i = 0; i < groups.length - 1; i++) {
         var group1 = groups[i];
 
-        url = GET_INTERSECTIONS_URL + group1['id'] + '/' + group['id'] + '/';
+        url = GET_INTERSECTIONS_URL + social + '/' + group1['id'] + '/' + group['id'] + '/';
         $.get(url, function(response) {
             $cell = $('<th>').html(response['intersections_count'])
             $cell.appendTo($row);
