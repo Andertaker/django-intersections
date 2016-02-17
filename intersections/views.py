@@ -189,9 +189,18 @@ class GetIntersectionsView(View):
         SELECT COUNT(group_id) as cnt, user_id
 
         FROM vkontakte_groups_group_members
-        WHERE group_id IN (%s, %s)
+        WHERE group_id IN (%s, %s) AND time_to IS NULL
         GROUP BY user_id
         HAVING COUNT(group_id) > 1
+    '''
+
+    twitter_query = '''
+        SELECT COUNT(from_user_id) as cnt, to_user_id
+
+        FROM twitter_api_user_followers
+        WHERE from_user_id IN (%s, %s) AND time_to IS NULL
+        GROUP BY to_user_id
+        HAVING COUNT(from_user_id) > 1
     '''
 
     @ajax_request
