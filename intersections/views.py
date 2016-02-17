@@ -97,44 +97,55 @@ class FetchGroupView(View):
                 # 'members_fetched_date': group.members_fetched_date,
         }
 
-@ajax_request
-def fetch_group_members_monitor(request, social, group_id):
 
-    process_name = "%s_%s_fetch_members_proccess" % (social, group_id)
-    thread = get_proccess_by_name(process_name)
+class FetchGroupMembersMonitorView(View):
 
-    if thread:
-        group = thread.group
-        status = 'in_progress'
-        group_members_in_db_count = thread.members_in_db_count
+    @csrf_exempt
+    @ajax_request
+    def dispatch(self, request, *args, **kwargs):
+        return super(FetchGroupMembersMonitorView, self).dispatch(request, *args, **kwargs)
 
-    else :
-        group = Group.objects.filter(pk=group_id).first()
-        if not group:
-            return {'success': False, 'errors': 'Group "%s %s" not found' % (social, group_id)}
+    def get(self, request, social, group_id):
+        return self.fetch_group_members_monitor(social, group_id)
 
-        if not group.members_fetched_date:
-            thread = FetchGroupMembersThread(group, name=process_name)
-            thread.start()
 
-            status = 'started'
+    def fetch_group_members_monitor(self, social, group_id):
+
+        process_name = "%s_%s_fetch_members_proccess" % (social, group_id)
+        thread = get_proccess_by_name(process_name)
+
+        if thread:
+            group = thread.group
+            status = 'in_progress'
             group_members_in_db_count = thread.members_in_db_count
 
-        else:
-            status = 'finished'
-            group_members_in_db_count = group.members.count()
+        else :
+            group = Group.objects.filter(pk=group_id).first()
+            if not group:
+                return {'success': False, 'errors': 'Group "%s %s" not found' % (social, group_id)}
 
-    group = {'id': group.pk,
-            'name': group.name,
-            'screen_name': group.screen_name,
-            'members_count': group.members_count,
-            'members_in_db_count': group_members_in_db_count,
-            'members_fetched_date': group.members_fetched_date,
-    }
+            if not group.members_fetched_date:
+                thread = FetchGroupMembersThread(group, name=process_name)
+                thread.start()
 
-    return {'status': status,
-            'group': group,
-    }
+                status = 'started'
+                group_members_in_db_count = thread.members_in_db_count
+
+            else:
+                status = 'finished'
+                group_members_in_db_count = group.members.count()
+
+        group = {'id': group.pk,
+                'name': group.name,
+                'screen_name': group.screen_name,
+                'members_count': group.members_count,
+                'members_in_db_count': group_members_in_db_count,
+                'members_fetched_date': group.members_fetched_date,
+        }
+
+        return {'status': status,
+                'group': group,
+        }
 
 
 @ajax_request
