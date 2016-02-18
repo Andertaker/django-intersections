@@ -46,7 +46,7 @@ class VkFetchGroupMembersThread(threading.Thread):
 
         while True:
             ids = self.fetch_members(group, offset=offset, count=1000)
-            if len(ids) == 0:
+            if len(ids) < 1000:
                 break
 
             self._user_ids += ids
