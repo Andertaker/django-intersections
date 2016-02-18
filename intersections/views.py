@@ -14,7 +14,7 @@ from twitter_api.models import User
 
 from . decorators import ajax_request
 from . forms import GroupsForm
-from . utils import get_social, get_screen_name
+from . utils import get_social, get_screen_name, members_last_update_time
 from . threads import VkFetchGroupMembersThread, TwitterFetchFollowersThread, \
                     get_proccess_by_name
 
@@ -78,7 +78,7 @@ class FetchGroupView(View):
                 'screen_name': group.screen_name,
                 'members_count': group.members_count,
                 'members_in_db_count': group.members.count(),
-                'members_fetched_date': group.members_fetched_date,
+                'members_fetched_date': members_last_update_time(group.members),
         }
 
     def twitter_fetch_user(self, screen_name):
@@ -95,7 +95,7 @@ class FetchGroupView(View):
                 'screen_name': user.screen_name,
                 'members_count': user.followers_count,
                 'members_in_db_count': user.followers.count(),
-                # 'members_fetched_date': group.members_fetched_date,
+                'members_fetched_date': members_last_update_time(group.followers),
         }
 
 
@@ -121,7 +121,7 @@ class FetchGroupMembersMonitorView(View):
             if not group:
                 return {'success': False, 'errors': 'Vk Group "%s" not found' % group_id}
 
-            if not group.members_fetched_date:
+            if not members_last_update_time(group.members):
                 thread = VkFetchGroupMembersThread(group, name=process_name)
                 thread.start()
 
@@ -137,7 +137,7 @@ class FetchGroupMembersMonitorView(View):
                 'screen_name': group.screen_name,
                 'members_count': group.members_count,
                 'members_in_db_count': group_members_in_db_count,
-                'members_fetched_date': group.members_fetched_date,
+                'members_fetched_date': members_last_update_time(group.members),
         }
 
         return {'status': status,
@@ -159,7 +159,8 @@ class FetchGroupMembersMonitorView(View):
             if not group:
                 return {'success': False, 'errors': 'Twitter User "%s" not found' % group_id}
 
-            if not group.followers_fetched_date:
+            members_fetched_date = members_last_update_time(group.followers)
+            if not members_fetched_date:
                 thread = TwitterFetchFollowersThread(group, name=process_name)
                 thread.start()
 
@@ -175,7 +176,7 @@ class FetchGroupMembersMonitorView(View):
                 'screen_name': group.screen_name,
                 'members_count': group.followers_count,
                 'members_in_db_count': group_members_in_db_count,
-                'members_fetched_date': group.followers_fetched_date,
+                'members_fetched_date': members_fetched_date,
         }
 
         return {'status': status,
