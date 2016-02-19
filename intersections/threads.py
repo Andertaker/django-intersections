@@ -46,12 +46,12 @@ class VkFetchGroupMembersThread(threading.Thread):
 
         while True:
             ids = self.fetch_members(group, offset=offset, count=1000)
-            if len(ids) < 1000:
-                break
-
             self._user_ids += ids
             self.members_in_db_count += len(ids)
             offset += 1000
+
+            if len(ids) < 1000:
+                break
 
         # save users
         users_to_fetch.disconnect(receiver=fetch_users) # prevent fetch users work
