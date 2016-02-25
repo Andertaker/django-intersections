@@ -95,7 +95,7 @@ class FetchGroupView(View):
                 'screen_name': user.screen_name,
                 'members_count': user.followers_count,
                 'members_in_db_count': user.followers.count(),
-                'members_fetched_date': members_last_update_time(group.followers),
+                'members_fetched_date': members_last_update_time(user.followers),
         }
 
 
@@ -153,6 +153,7 @@ class FetchGroupMembersMonitorView(View):
             group = thread.user
             status = 'in_progress'
             group_members_in_db_count = thread.followers_in_db_count
+            members_fetched_date = members_last_update_time(group.followers)
 
         else :
             group = User.objects.filter(pk=group_id).first()
