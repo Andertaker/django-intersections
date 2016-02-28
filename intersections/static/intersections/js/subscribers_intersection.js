@@ -91,12 +91,22 @@ function fetch_members(social, group_id, i) {
     url = FETCH_GROUP_MEMBERS_MONITOR_URL + social + '/' + group_id + '/'
     $cell = $subscribers_table.find('tr:last td:nth-child(3)');
 
+    var error;
     var group;
 
     settings = {
         'url': url,
         'async': false,
         'success': function(response) {
+            error = null;
+            group = null;
+
+            if (response['errors']) {
+                error = '<i class="error">' + response['errors'] + '</i>';
+                $cell.html(error);
+                return
+            }
+
             group = response['group'];
 
             var members_in_db_count = group['members_in_db_count'];
@@ -110,7 +120,11 @@ function fetch_members(social, group_id, i) {
 
     update_members = function(){
         $.get(settings);
-        if (group['members_fetched_date']) {
+        if(error) {
+            clearInterval(intervalID);
+            iterate(i); // iterate next link
+        }
+        else if (group['members_fetched_date']) {
             clearInterval(intervalID);
             groups.push(group);
             generate_intersections_table(social);

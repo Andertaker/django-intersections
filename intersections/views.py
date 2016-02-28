@@ -102,13 +102,11 @@ class FetchGroupView(View):
         }
 
     def instagram_fetch_user(self, username):
-        user = InstagramUser.objects.filter(username=username).first()
-
-        if not user or user.fetched < timezone.now() - GROUP_REFETCH_TIME:
-            try:
-                user = InstagramUser.remote.fetch_by_slug(username)
-            except ValueError:
-                return None
+        # we fetch user here coz we need is_private property
+        try:
+            user = InstagramUser.remote.fetch_by_slug(username)
+        except ValueError:
+            return None
 
         return {'id': user.pk,
                 'name': user.full_name,
@@ -219,6 +217,8 @@ class FetchGroupMembersMonitorView(View):
             group = InstagramUser.objects.filter(pk=group_id).first()
             if not group:
                 return {'success': False, 'errors': 'Instagram User "%s" not found' % group_id}
+            elif group.is_private:
+                return {'success': False, 'errors': 'This account is private'}
 
             members_fetched_date = members_last_update_time(group.followers)
             if not members_fetched_date:
