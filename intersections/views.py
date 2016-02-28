@@ -264,6 +264,15 @@ class GetIntersectionsView(View):
         HAVING COUNT(from_user_id) > 1
     '''
 
+    instagram_query = '''
+        SELECT COUNT(from_user_id) as cnt, to_user_id
+
+        FROM instagram_api_user_followers
+        WHERE from_user_id IN (%s, %s) AND time_to IS NULL
+        GROUP BY to_user_id
+        HAVING COUNT(from_user_id) > 1
+    '''
+
     @ajax_request
     def get(self, request, social, group_id1, group_id2):
         q = getattr(self, '%s_query' % social)
