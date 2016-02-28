@@ -17,7 +17,7 @@ from . decorators import ajax_request
 from . forms import GroupsForm
 from . utils import get_social, get_screen_name, members_last_update_time
 from . threads import VkFetchGroupMembersThread, TwitterFetchFollowersThread, \
-                    get_proccess_by_name
+                    InstagramFetchFollowersThread, get_proccess_by_name
 
 
 GROUP_REFETCH_TIME = timedelta(hours=3)
@@ -204,6 +204,45 @@ class FetchGroupMembersMonitorView(View):
                 'group': group,
         }
 
+    def instagram_monitor(self, group_id): # user_id
+
+        process_name = "instagram_%s_fetch_members_proccess" % group_id
+        thread = get_proccess_by_name(process_name)
+
+        if thread:
+            group = thread.user
+            status = 'in_progress'
+            group_members_in_db_count = thread.followers_in_db_count
+            members_fetched_date = members_last_update_time(group.followers)
+
+        else :
+            group = InstagramUser.objects.filter(pk=group_id).first()
+            if not group:
+                return {'success': False, 'errors': 'Instagram User "%s" not found' % group_id}
+
+            members_fetched_date = members_last_update_time(group.followers)
+            if not members_fetched_date:
+                thread = InstagramFetchFollowersThread(group, name=process_name)
+                thread.start()
+
+                status = 'started'
+                group_members_in_db_count = thread.followers_in_db_count
+
+            else:
+                status = 'finished'
+                group_members_in_db_count = group.followers.count()
+
+        group = {'id': group.pk,
+                'name': group.full_name,
+                'screen_name': group.username,
+                'members_count': group.followers_count,
+                'members_in_db_count': group_members_in_db_count,
+                'members_fetched_date': members_fetched_date,
+        }
+
+        return {'status': status,
+                'group': group,
+        }
 
 
 class GetIntersectionsView(View):

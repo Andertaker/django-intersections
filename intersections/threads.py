@@ -58,7 +58,7 @@ class VkFetchGroupMembersThread(threading.Thread):
         group.members = self._user_ids
 
         if group.members_count > group.members.count():
-            raise Exception("Error occured while fetch members for group %s" % group.pk)
+            raise Exception("Error occured while fetch members for VK group %s" % group.pk)
 
 
 class TwitterFetchFollowersThread(threading.Thread):
@@ -71,9 +71,7 @@ class TwitterFetchFollowersThread(threading.Thread):
 
     def __init__(self, user, *args, **kwargs):
         threading.Thread.__init__(self, *args, **kwargs)
-
         self.daemon = True
-
         self.user = user
 
     def run(self):
@@ -81,4 +79,23 @@ class TwitterFetchFollowersThread(threading.Thread):
         user.fetch_followers(all=True)
 
         if user.followers_count > user.followers.count():
-            raise Exception("Error occured while fetch followers for user %s" % user.pk)
+            raise Exception("Error occured while fetch followers for twitter user %s" % user.pk)
+
+
+
+class InstagramFetchFollowersThread(threading.Thread):
+
+    user = None
+    followers_in_db_count = 0 # instagram return all list at once
+
+    def __init__(self, user, *args, **kwargs):
+        threading.Thread.__init__(self, *args, **kwargs)
+        self.daemon = True
+        self.user = user
+
+    def run(self):
+        user = self.user
+        user.fetch_followers()
+
+        if user.followers_count > user.followers.count():
+            raise Exception("Error occured while fetch followers for instagram user %s" % user.pk)
