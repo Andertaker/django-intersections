@@ -11,6 +11,7 @@ from vkontakte_api.api import ApiCallError
 from vkontakte_groups.models import Group
 from tweepy import TweepError
 from twitter_api.models import User
+from instagram_api.models import User as InstagramUser
 
 from . decorators import ajax_request
 from . forms import GroupsForm
@@ -54,6 +55,8 @@ class FetchGroupView(View):
             group = self.vk_fetch_group(screen_name)
         elif social == 'twitter':
             group = self.twitter_fetch_user(screen_name)
+        elif social == 'instagram':
+            group = self.instagram_fetch_user(screen_name)
 
         if not group:
             return {'success': False, 'errors': 'Group "%s" not found' % screen_name}
@@ -93,6 +96,23 @@ class FetchGroupView(View):
         return {'id': user.pk,
                 'name': user.name,
                 'screen_name': user.screen_name,
+                'members_count': user.followers_count,
+                'members_in_db_count': user.followers.count(),
+                'members_fetched_date': members_last_update_time(user.followers),
+        }
+
+    def instagram_fetch_user(self, username):
+        user = InstagramUser.objects.filter(username=username).first()
+
+        if not user or user.fetched < timezone.now() - GROUP_REFETCH_TIME:
+            try:
+                user = InstagramUser.remote.fetch_by_slug(username)
+            except ValueError:
+                return None
+
+        return {'id': user.pk,
+                'name': user.full_name,
+                'screen_name': user.username,
                 'members_count': user.followers_count,
                 'members_in_db_count': user.followers.count(),
                 'members_fetched_date': members_last_update_time(user.followers),

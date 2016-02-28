@@ -3,7 +3,8 @@ import re
 
 
 GROUPS_RE = {'twitter': re.compile(r'^https?://twitter.com/([\w\d\_]+)/?$'),
-           'vk': re.compile(r'^https?://vk.com/([\w\d\_]+)/?$')
+           'vk': re.compile(r'^https?://vk.com/([\w\d\_]+)/?$'),
+           'instagram': re.compile(r'^https?://www.instagram.com/([\w\d\_]+)/?$'),
 }
 
 
@@ -11,6 +12,7 @@ def get_social(link):
     SOCIALS = {'twitter': 'https://twitter.com',
                'vk': 'https://vk.com',
                # 'fb': 'https://www.facebook.com',
+               'instagram': 'https://www.instagram.com',
     }
     for social_name, social_url in SOCIALS.items():
         if link.startswith(social_url):
