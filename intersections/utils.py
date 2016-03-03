@@ -23,6 +23,8 @@ def get_social(link):
 
 def get_screen_name(link):
     social = get_social(link)
+    if not social in GROUPS_RE:
+        return None
     group_re = GROUPS_RE[social]
 
     m = group_re.match(link)

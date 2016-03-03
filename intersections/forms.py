@@ -9,5 +9,9 @@ class GroupsForm(forms.Form):
                                 'class': 'form-control',
                                 'rows': '5',
                                 'style': 'width: 100% !important;',
+                                'placeholder': '''
+Введите ссылки на группы соц. сетей 
+(поддерживаются vkontakte, twitter, instagram)
+                                ''',
                                 'required': '',
                             }))
