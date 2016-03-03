@@ -17,7 +17,6 @@ $("#group_form").submit(function(e){
     links = $(this).find('#id_links').val();
     links_arr = links.trim().split(/\s+/);
 
-    $subscribers_table = $('#subscribers_table').show();
     $subscribers_table = $('#subscribers_table').find('tbody');
     $subscribers_table.html('');
 
@@ -25,11 +24,42 @@ $("#group_form").submit(function(e){
     $intersections_tbody.html('');
     $intersections_thead = $('#intersections_table thead');
     $intersections_thead.html('<tr><th>ПЕРЕСЕЧЕНИЕ</th><th></th></tr><tr><th></th><th></th></tr>');
+    $intersections_thead.hide();
 
     groups = [];
     var i = 0;
+
+    $status = $(this).find('#status').html('');
+
+    if (!check_links(links_arr)) {
+        $status.html('Ссылки не принадлежат одной соц.сети')
+        $('#subscribers_table').hide();
+        return false
+    }
+
+    $('#subscribers_table').show();
     iterate(i);
 });
+
+
+function check_links(links_arr) {
+    var prev_social;
+
+    for (i in links_arr) {
+        var link = links_arr[i];
+        var arr = link.split('/');
+        if (arr.length < 3)  // wrong url
+            continue
+
+        social = arr[2];
+        if (prev_social && prev_social != social)
+            return false
+        else
+            prev_social = social
+    }
+
+    return true
+}
 
 
 
@@ -137,6 +167,7 @@ function fetch_members(social, group_id, i) {
 
 
 function generate_intersections_table(social) {
+    $intersections_thead.show();
     group = groups[groups.length-1] // last group
 
     // thead
