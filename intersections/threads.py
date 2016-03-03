@@ -86,7 +86,9 @@ class TwitterFetchFollowersThread(threading.Thread):
 class InstagramFetchFollowersThread(threading.Thread):
 
     user = None
-    followers_in_db_count = 0 # instagram return all list at once
+    @property
+    def followers_in_db_count(self):
+        return len(self.user._followers_ids)
 
     def __init__(self, user, *args, **kwargs):
         threading.Thread.__init__(self, *args, **kwargs)
