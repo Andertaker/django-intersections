@@ -53,8 +53,12 @@
 {% block js %}
 <script>
     FETCH_GROUP_URL = '{% url 'intersections:fetch_group' %}';
-    FETCH_GROUP_MEMBERS_MONITOR_URL =  '/intersections/fetch_group_members_monitor/';
-    GET_INTERSECTIONS_URL = '/intersections/get_intersections/';
+
+    {% url 'intersections:fetch_group_members_monitor' social='vk' group_id=123 as monitor_url %}
+    FETCH_GROUP_MEMBERS_MONITOR_URL = '{{ monitor_url|slice:":-7" }}'; {# remove 'vk/123/' from end #}
+
+    {% url 'intersections:get_intersections' social='vk' group_id1=123 group_id2=456 as intersectons_url %}
+    GET_INTERSECTIONS_URL = '{{ intersectons_url|slice:":-11" }}'; {# remove 'vk/123/456/' from end #}
 </script>
 
     <script src="{% static 'intersections/js/subscribers_intersection.js' %}"></script>
