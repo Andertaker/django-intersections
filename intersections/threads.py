@@ -88,7 +88,10 @@ class InstagramFetchFollowersThread(threading.Thread):
     user = None
     @property
     def followers_in_db_count(self):
-        return len(self.user._followers_ids)
+        if hasattr(user, '_followers_ids'):
+            return len(self.user._followers_ids)
+
+        return 0
 
     def __init__(self, user, *args, **kwargs):
         threading.Thread.__init__(self, *args, **kwargs)
