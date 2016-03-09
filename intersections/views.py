@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.db import connection
 
-from vkontakte_api.api import ApiCallError
+from vkontakte_api.api import VkontakteError
 from vkontakte_groups.models import Group
 from tweepy import TweepError
 from twitter_api.models import User
@@ -73,7 +73,7 @@ class FetchGroupView(View):
         if not group or group.fetched < timezone.now() - GROUP_REFETCH_TIME:
             try:
                 group = Group.remote.fetch(ids=[screen_name])[0]
-            except ApiCallError:
+            except VkontakteError:
                 return None
 
         return {'id': group.pk,
