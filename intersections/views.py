@@ -87,7 +87,7 @@ class FetchGroupView(View):
     def twitter_fetch_user(self, screen_name):
         user = User.objects.filter(screen_name=screen_name).first()
 
-        if not user or user.fetched < timezone.now() - GROUP_REFETCH_TIME:
+        if not user or user.fetched is None or user.fetched < timezone.now() - GROUP_REFETCH_TIME:
             try:
                 user = User.remote.fetch(screen_name)
             except TweepError:
